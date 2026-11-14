@@ -1185,3 +1185,248 @@ input:checked + .toggle-slider:before {
         justify-content: center;
     }
 }
+
+/* Settings refresh: calmer surfaces, clearer hierarchy, and room for the roster. */
+.settings-modal-card {
+    width: min(1180px, 96vw);
+    max-width: 1180px;
+    max-height: min(92vh, 900px);
+    background: #0c111b;
+    border-color: rgba(148, 163, 184, 0.18);
+    box-shadow: 0 28px 100px rgba(0, 0, 0, 0.72), 0 0 0 1px rgba(255, 255, 255, 0.025);
+}
+
+.modal-header-bar {
+    padding: 20px 26px;
+    background: linear-gradient(110deg, rgba(18, 28, 43, 0.98), rgba(12, 17, 27, 0.98));
+    border-color: rgba(148, 163, 184, 0.14);
+}
+
+.modal-title-row h2 {
+    font-size: 21px;
+    letter-spacing: -0.35px;
+}
+
+.settings-modal-body {
+    grid-template-columns: minmax(250px, 0.78fr) minmax(0, 1.55fr);
+    gap: 16px;
+    padding: 18px 22px 24px;
+    max-height: none;
+}
+
+.settings-controls-pane,
+.settings-lists-pane {
+    min-width: 0;
+    gap: 12px;
+}
+
+.settings-group,
+.list-panel {
+    background: linear-gradient(155deg, rgba(22, 31, 46, 0.92), rgba(15, 22, 34, 0.96));
+    border: 1px solid rgba(148, 163, 184, 0.14);
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.settings-group-title {
+    color: #dbeafe;
+    font-size: 12px;
+    letter-spacing: 0.7px;
+}
+
+.setting-desc {
+    color: #9aa9bd;
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+.settings-group .form-select,
+.list-input,
+.bulk-textarea {
+    background: #0a101a;
+    border-color: rgba(148, 163, 184, 0.24);
+    border-radius: 9px;
+    min-height: 40px;
+    padding: 9px 12px;
+}
+
+.form-select:focus-visible,
+.list-input:focus-visible,
+.bulk-textarea:focus-visible,
+button:focus-visible,
+.arcade-slider:focus-visible {
+    outline: 2px solid var(--neon-cyan);
+    outline-offset: 3px;
+}
+
+.settings-group .arcade-slider {
+    margin: 4px 0;
+}
+
+.settings-lists-pane {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.list-panel {
+    min-height: 430px;
+    gap: 14px;
+}
+
+.list-panel.players-panel {
+    border-top: 2px solid var(--neon-cyan);
+}
+
+.list-panel.targets-panel {
+    border-top: 2px solid var(--neon-pink);
+}
+
+.list-title {
+    font-size: 14px;
+}
+
+.list-count-badge {
+    color: #c6d2e1;
+    padding: 4px 9px;
+}
+
+.btn-add-item,
+.btn-secondary-sm {
+    min-height: 38px;
+    border-radius: 9px;
+}
+
+.btn-secondary-sm {
+    font-size: 12px;
+}
+
+.list-items-container {
+    max-height: 300px;
+    gap: 7px;
+}
+
+.list-item {
+    min-height: 42px;
+    padding: 7px 9px;
+    background: rgba(7, 12, 20, 0.58);
+    border-color: rgba(148, 163, 184, 0.11);
+}
+
+.item-order {
+    text-align: center;
+}
+
+.status-pill {
+    font-size: 9px;
+    letter-spacing: 0.25px;
+    white-space: nowrap;
+}
+
+.toggle-switch {
+    flex: 0 0 44px;
+}
+
+.toggle-switch input {
+    position: absolute;
+    opacity: 0;
+    width: 44px;
+    height: 24px;
+    margin: 0;
+    cursor: pointer;
+}
+
+.toggle-switch input:focus-visible + .toggle-slider {
+    outline: 2px solid var(--neon-cyan);
+    outline-offset: 3px;
+}
+
+.turn-handoff {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: min(100%, 370px);
+    margin: 16px auto 0;
+    padding: 14px 18px;
+    border: 1px solid rgba(255, 214, 0, 0.26);
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(255, 214, 0, 0.09), rgba(255, 255, 255, 0.035));
+    text-align: left;
+}
+
+.handoff-label {
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.handoff-player {
+    overflow-wrap: anywhere;
+    color: var(--neon-amber);
+    font-family: var(--font-heading);
+    font-size: 20px;
+    line-height: 1.2;
+}
+
+.btn-primary-cta:disabled {
+    cursor: not-allowed;
+    filter: grayscale(0.75);
+    opacity: 0.55;
+    transform: none;
+    box-shadow: none;
+}
+
+@media (max-width: 860px) {
+    .settings-modal-card {
+        width: min(700px, 96vw);
+        max-height: 94vh;
+    }
+
+    .settings-modal-body {
+        grid-template-columns: 1fr;
+        padding: 14px;
+    }
+
+    .settings-lists-pane {
+        grid-template-columns: 1fr;
+    }
+
+    .list-panel {
+        min-height: 320px;
+    }
+}
+
+@media (max-width: 600px) {
+    .settings-modal-card {
+        width: 100%;
+        max-height: 96vh;
+        border-radius: 14px;
+    }
+
+    .settings-modal-body {
+        gap: 12px;
+        padding: 12px;
+    }
+
+    .modal-header-bar {
+        padding: 15px 16px;
+    }
+
+    .modal-title-row h2 {
+        font-size: 17px;
+    }
+
+    .settings-group,
+    .list-panel {
+        padding: 13px;
+    }
+
+    .list-item-meta {
+        gap: 6px;
+    }
+
+    .controls-hint-pill {
+        line-height: 1.7;
+    }
+}

@@ -124,6 +124,15 @@ document.addEventListener('DOMContentLoaded', () => {
         hudUpNext.textContent = upNextPlayer ? upNextPlayer.name : (currentPlayer ? 'Last Player' : 'None');
         hudTargetsLeft.textContent = `${targetsLeft} left`;
 
+        if (readyOverlay.classList.contains('active')) {
+            const readyPlayer = window.listManager.getCurrentPlayer();
+            const nextPlayer = window.listManager.getUpNextPlayer();
+            readyPlayerName.textContent = readyPlayer ? readyPlayer.name : 'Queue Empty';
+            readyUpNext.textContent = nextPlayer ? nextPlayer.name : 'No one — final turn';
+            btnStartRound.disabled = !readyPlayer || targetsLeft === 0;
+            btnStartRound.setAttribute('aria-disabled', String(btnStartRound.disabled));
+        }
+
         const historyCount = window.listManager.matchesHistory.length;
         historyBadgeCount.textContent = historyCount;
         historyBadgeCount.style.display = historyCount > 0 ? 'inline-flex' : 'none';
