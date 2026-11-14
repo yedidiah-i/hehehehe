@@ -74,18 +74,6 @@ body {
     gap: 12px;
 }
 
-.logo-badge {
-    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink));
-    color: #000;
-    font-family: var(--font-heading);
-    font-weight: 900;
-    font-size: 14px;
-    padding: 4px 10px;
-    border-radius: var(--radius-sm);
-    box-shadow: 0 0 12px var(--neon-cyan-glow);
-    letter-spacing: 1px;
-}
-
 .brand-title {
     font-family: var(--font-heading);
     font-size: 18px;

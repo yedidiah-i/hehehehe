@@ -784,7 +784,7 @@ class GameEngine {
         ctx.font = `500 15px 'Inter', system-ui, sans-serif`;
         ctx.fillStyle = '#94a3b8';
         ctx.shadowBlur = 0;
-        ctx.fillText('Press Pause Button or Escape to Resume', this.virtualWidth / 2, this.virtualHeight / 2 + 25);
+        ctx.fillText('Press Escape to resume', this.virtualWidth / 2, this.virtualHeight / 2 + 25);
         ctx.restore();
     }
 }

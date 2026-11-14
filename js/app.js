@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnSettings = document.getElementById('btnSettings');
     const btnHistory = document.getElementById('btnHistory');
     const btnSound = document.getElementById('btnSound');
-    const btnPause = document.getElementById('btnPause');
 
     // Modals & Drawers
     const readyOverlay = document.getElementById('readyOverlay');
@@ -101,9 +100,6 @@ document.addEventListener('DOMContentLoaded', () => {
         onCrash: (brickName, survivalTime, dodgedCount) => {
             handleCrashEvent(brickName, survivalTime, dodgedCount);
         },
-        onStateChange: (state) => {
-            handleStateChange(state);
-        },
         onHudUpdate: (hudData) => {
             updateHUDStats(hudData);
         },
@@ -148,16 +144,6 @@ document.addEventListener('DOMContentLoaded', () => {
             speedText += ` (+${Math.round((data.rampMultiplier - 1) * 100)}%)`;
         }
         hudSpeedBadge.textContent = speedText;
-    }
-
-    function handleStateChange(state) {
-        if (state === 'PAUSED') {
-            btnPause.classList.add('active');
-            btnPause.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Resume`;
-        } else {
-            btnPause.classList.remove('active');
-            btnPause.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg> Pause`;
-        }
     }
 
     function handleSpaceShortcut() {
@@ -586,11 +572,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     volumeSlider.addEventListener('input', (e) => {
         window.soundEngine.setVolume(parseFloat(e.target.value));
-    });
-
-    // Pause button
-    btnPause.addEventListener('click', () => {
-        game.togglePause();
     });
 
     // Next Player Ready / Start buttons
