@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arcade Dodge: Name Crash Elimination</title>
+    <meta name="theme-color" content="#101522">
+    <meta name="description" content="A fast, party-ready arcade game of falling names, quick reflexes, and big crashes.">
+    <title>Crash Club — Name Dodge Arcade</title>
     
-    <!-- Google Fonts for Cyberpunk / Neon Arcade Typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800;900&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -17,7 +18,11 @@
     <!-- TOP HUD & CONTROL BAR -->
     <header class="app-header">
         <div class="brand-section">
-            <h1 class="brand-title">NAME CRASH DODGE</h1>
+            <div class="brand-mark" aria-hidden="true">CC</div>
+            <div class="brand-copy">
+                <h1 class="brand-title">Crash Club</h1>
+                <span class="brand-caption">NAME DODGE ARCADE</span>
+            </div>
         </div>
 
         <div class="hud-roster-group">
@@ -68,6 +73,13 @@
 
     <!-- MAIN GAME CANVAS VIEWPORT -->
     <main class="game-viewport">
+        <div class="stage-heading">
+            <div>
+                <p class="stage-kicker">THE ARCADE</p>
+                <h2>Stay sharp. Don&apos;t get tagged.</h2>
+            </div>
+            <p class="stage-note">A new name falls every few seconds.<br>Keep moving and outlast the round.</p>
+        </div>
         <div class="canvas-container">
             <canvas id="gameCanvas"></canvas>
 
@@ -76,10 +88,10 @@
                 <div class="overlay-card">
                     <div class="overlay-header">
                         <div class="overlay-subtitle" id="readyRoundNum">ROUND 1</div>
-                        <h2 class="overlay-title">Ready, <span class="highlight-player" id="readyPlayerName">Player</span>!</h2>
+                        <h2 class="overlay-title">You&apos;re up, <span class="highlight-player" id="readyPlayerName">Player</span>.</h2>
                     </div>
                     <div class="overlay-body">
-                        <p class="overlay-desc">Dodge falling target bricks as long as you can. When you crash into a brick, its name is permanently paired with you and removed from the target pool!</p>
+                        <p class="overlay-desc">Move left and right to dodge the falling names. The one that catches you gets paired with you and leaves the pool.</p>
                         <section class="turn-handoff" aria-label="Player turn order">
                             <span class="handoff-label">Then you’re handing off to</span>
                             <strong class="handoff-player" id="readyUpNext">Loading next player…</strong>
@@ -89,7 +101,8 @@
                         </div>
                     </div>
                     <div class="overlay-footer">
-                        <button class="btn-primary-cta" id="btnStartRound">START ROUND (SPACE)</button>
+                        <button class="btn-primary-cta" id="btnStartRound">Start round <span class="button-shortcut">SPACE</span></button>
+                        <button class="btn-text-action" id="btnReadySettings">Edit players &amp; targets</button>
                     </div>
                 </div>
             </div>
