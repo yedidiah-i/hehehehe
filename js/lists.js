@@ -52,15 +52,14 @@ class ListManager {
             const saved = localStorage.getItem(this.STORAGE_KEY);
             if (saved) {
                 const parsed = JSON.parse(saved);
-                this.activePlayersQueue = parsed.activePlayersQueue || [];
-                this.targetBricksPool = parsed.targetBricksPool || [];
-                this.matchesHistory = parsed.matchesHistory || [];
-                this.currentRoundNumber = parsed.currentRoundNumber || 1;
-                this.initialRosterSnapshot = parsed.initialRosterSnapshot || null;
-                this.tournamentWinner = parsed.tournamentWinner || null;
-                this.wonTargets = parsed.wonTargets || [];
-
-                if (this.tournamentWinner || (this.activePlayersQueue.length > 0 && this.targetBricksPool.length > 0)) {
+                if (Array.isArray(parsed.activePlayersQueue) && Array.isArray(parsed.targetBricksPool)) {
+                    this.activePlayersQueue = parsed.activePlayersQueue;
+                    this.targetBricksPool = parsed.targetBricksPool;
+                    this.matchesHistory = Array.isArray(parsed.matchesHistory) ? parsed.matchesHistory : [];
+                    this.currentRoundNumber = parsed.currentRoundNumber || 1;
+                    this.initialRosterSnapshot = parsed.initialRosterSnapshot || null;
+                    this.tournamentWinner = parsed.tournamentWinner || null;
+                    this.wonTargets = Array.isArray(parsed.wonTargets) ? parsed.wonTargets : [];
                     return;
                 }
             }
@@ -104,6 +103,14 @@ class ListManager {
             players: this.activePlayersQueue.map(p => p.name),
             targets: this.targetBricksPool.map(t => t.name)
         };
+        this.saveToStorage();
+    }
+
+    syncRosterSnapshot() {
+        this.initialRosterSnapshot = {
+            players: this.activePlayersQueue.map(player => player.name),
+            targets: this.targetBricksPool.map(target => target.name)
+        };
     }
 
     // ==========================================
@@ -123,6 +130,7 @@ class ListManager {
         if (!trimmed) return null;
         const player = { id: this.createId(), name: trimmed };
         this.activePlayersQueue.push(player);
+        this.syncRosterSnapshot();
         this.saveToStorage();
         return player;
     }
@@ -133,14 +141,26 @@ class ListManager {
         names.forEach(name => {
             this.activePlayersQueue.push({ id: this.createId(), name });
         });
+        this.syncRosterSnapshot();
         this.saveToStorage();
         return names.length;
+    }
+
+    renamePlayer(id, name) {
+        const trimmed = (name || '').trim();
+        const player = this.activePlayersQueue.find(entry => entry.id === id);
+        if (!player || !trimmed) return false;
+        player.name = trimmed;
+        this.syncRosterSnapshot();
+        this.saveToStorage();
+        return true;
     }
 
     removePlayer(id) {
         const idx = this.activePlayersQueue.findIndex(p => p.id === id);
         if (idx !== -1) {
             this.activePlayersQueue.splice(idx, 1);
+            this.syncRosterSnapshot();
             this.saveToStorage();
             return true;
         }
@@ -156,6 +176,7 @@ class ListManager {
         const temp = this.activePlayersQueue[idx];
         this.activePlayersQueue[idx] = this.activePlayersQueue[targetIdx];
         this.activePlayersQueue[targetIdx] = temp;
+        this.syncRosterSnapshot();
         this.saveToStorage();
         return true;
     }
@@ -165,11 +186,13 @@ class ListManager {
             const j = Math.floor(Math.random() * (i + 1));
             [this.activePlayersQueue[i], this.activePlayersQueue[j]] = [this.activePlayersQueue[j], this.activePlayersQueue[i]];
         }
+        this.syncRosterSnapshot();
         this.saveToStorage();
     }
 
     clearPlayers() {
         this.activePlayersQueue = [];
+        this.syncRosterSnapshot();
         this.saveToStorage();
     }
 
@@ -182,6 +205,7 @@ class ListManager {
         if (!trimmed) return null;
         const target = { id: this.createId(), name: trimmed };
         this.targetBricksPool.push(target);
+        this.syncRosterSnapshot();
         this.saveToStorage();
         return target;
     }
@@ -192,14 +216,26 @@ class ListManager {
         names.forEach(name => {
             this.targetBricksPool.push({ id: this.createId(), name });
         });
+        this.syncRosterSnapshot();
         this.saveToStorage();
         return names.length;
+    }
+
+    renameTarget(id, name) {
+        const trimmed = (name || '').trim();
+        const target = this.targetBricksPool.find(entry => entry.id === id);
+        if (!target || !trimmed) return false;
+        target.name = trimmed;
+        this.syncRosterSnapshot();
+        this.saveToStorage();
+        return true;
     }
 
     removeTarget(id) {
         const idx = this.targetBricksPool.findIndex(t => t.id === id);
         if (idx !== -1) {
             this.targetBricksPool.splice(idx, 1);
+            this.syncRosterSnapshot();
             this.saveToStorage();
             return true;
         }
@@ -225,11 +261,13 @@ class ListManager {
             const j = Math.floor(Math.random() * (i + 1));
             [this.targetBricksPool[i], this.targetBricksPool[j]] = [this.targetBricksPool[j], this.targetBricksPool[i]];
         }
+        this.syncRosterSnapshot();
         this.saveToStorage();
     }
 
     clearTargets() {
         this.targetBricksPool = [];
+        this.syncRosterSnapshot();
         this.saveToStorage();
     }
 

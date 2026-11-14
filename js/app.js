@@ -12,6 +12,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const hudDodgedCount = document.getElementById('hudDodgedCount');
     const hudSpeedBadge = document.getElementById('hudSpeedBadge');
     const hudRoundNum = document.getElementById('hudRoundNum');
+    const previewPlayers = document.getElementById('previewPlayers');
+    const previewPlayersCount = document.getElementById('previewPlayersCount');
+    const previewTargets = document.getElementById('previewTargets');
+    const previewTargetsCount = document.getElementById('previewTargetsCount');
+    const btnManageRoster = document.getElementById('btnManageRoster');
 
     // Action buttons
     const btnSettings = document.getElementById('btnSettings');
@@ -111,6 +116,42 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 3. UI State & Helpers
+    function renderRosterPreview(container, entries, emptyMessage) {
+        container.replaceChildren();
+
+        if (entries.length === 0) {
+            const empty = document.createElement('span');
+            empty.className = 'roster-preview-empty';
+            empty.textContent = emptyMessage;
+            container.appendChild(empty);
+            return;
+        }
+
+        entries.slice(0, 4).forEach((entry, index) => {
+            const name = document.createElement('span');
+            name.className = 'roster-preview-chip';
+            name.textContent = entry.name;
+            name.title = `${index + 1}. ${entry.name}`;
+            container.appendChild(name);
+        });
+
+        if (entries.length > 4) {
+            const remaining = document.createElement('span');
+            remaining.className = 'roster-preview-more';
+            remaining.textContent = `+${entries.length - 4} more`;
+            container.appendChild(remaining);
+        }
+    }
+
+    function updateRosterPreview() {
+        const players = window.listManager.activePlayersQueue;
+        const targets = window.listManager.targetBricksPool;
+        previewPlayersCount.textContent = `${players.length} ${players.length === 1 ? 'player' : 'players'}`;
+        previewTargetsCount.textContent = `${targets.length} remaining`;
+        renderRosterPreview(previewPlayers, players, 'No players in the queue');
+        renderRosterPreview(previewTargets, targets, 'No targets remaining');
+    }
+
     function updateHUDOverview() {
         const currentPlayer = window.listManager.getCurrentPlayer();
         const upNextPlayer = window.listManager.getUpNextPlayer();
@@ -130,6 +171,8 @@ document.addEventListener('DOMContentLoaded', () => {
             btnStartRound.disabled = !readyPlayer || targetsLeft === 0;
             btnStartRound.setAttribute('aria-disabled', String(btnStartRound.disabled));
         }
+
+        updateRosterPreview();
 
         const historyCount = window.listManager.matchesHistory.length;
         historyBadgeCount.textContent = historyCount;
@@ -331,6 +374,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${idx === 1 ? '<span class="status-pill next">Up Next</span>' : ''}
                 </div>
                 <div class="list-item-actions">
+                    <button class="icon-btn-sm" title="Rename ${escapeHtml(player.name)}" aria-label="Rename ${escapeHtml(player.name)}" data-action="rename" data-id="${player.id}">✎</button>
                     <button class="icon-btn-sm" title="Move Up" data-action="up" data-id="${player.id}" ${idx === 0 ? 'disabled' : ''}>▲</button>
                     <button class="icon-btn-sm" title="Move Down" data-action="down" data-id="${player.id}" ${idx === queue.length - 1 ? 'disabled' : ''}>▼</button>
                     <button class="icon-btn-sm danger" title="Remove" data-action="delete" data-id="${player.id}">✕</button>
@@ -359,6 +403,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span class="item-name">${escapeHtml(target.name)}</span>
                 </div>
                 <div class="list-item-actions">
+                    <button class="icon-btn-sm" title="Rename ${escapeHtml(target.name)}" aria-label="Rename ${escapeHtml(target.name)}" data-action="rename" data-id="${target.id}">✎</button>
                     <button class="icon-btn-sm danger" title="Remove" data-action="delete" data-id="${target.id}">✕</button>
                 </div>
             `;
@@ -400,6 +445,53 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function startRosterRename(item, id, currentName, renameEntry, renderList) {
+        const name = item.querySelector('.item-name');
+        const input = document.createElement('input');
+        input.className = 'inline-rename-input';
+        input.type = 'text';
+        input.maxLength = 24;
+        input.value = currentName;
+        input.setAttribute('aria-label', `New name for ${currentName}`);
+        name.replaceWith(input);
+
+        const actions = item.querySelector('.list-item-actions');
+        const saveButton = document.createElement('button');
+        saveButton.className = 'icon-btn-sm';
+        saveButton.type = 'button';
+        saveButton.textContent = 'Save';
+        saveButton.setAttribute('aria-label', 'Save name');
+        const cancelButton = document.createElement('button');
+        cancelButton.className = 'icon-btn-sm';
+        cancelButton.type = 'button';
+        cancelButton.textContent = 'Cancel';
+        cancelButton.setAttribute('aria-label', 'Cancel rename');
+        actions.replaceChildren(saveButton, cancelButton);
+
+        const finish = (save) => {
+            if (save && !renameEntry(id, input.value)) {
+                input.setCustomValidity('Enter a name before saving.');
+                input.reportValidity();
+                input.focus();
+                return;
+            }
+            renderList();
+            if (save) {
+                updateHUDOverview();
+                showToast('Name updated');
+            }
+        };
+
+        saveButton.addEventListener('click', () => finish(true));
+        cancelButton.addEventListener('click', () => finish(false));
+        input.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && !event.isComposing && event.keyCode !== 229) finish(true);
+            if (event.key === 'Escape') finish(false);
+        });
+        input.focus();
+        input.select();
+    }
+
     // 7. Event Listeners for Lists & Settings
     // Players List Actions
     btnAddPlayer.addEventListener('click', () => {
@@ -413,7 +505,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     inputPlayerName.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') btnAddPlayer.click();
+        if (e.key === 'Enter' && !e.isComposing && e.keyCode !== 229) btnAddPlayer.click();
     });
 
     btnBulkAddPlayers.addEventListener('click', () => {
@@ -448,6 +540,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const id = btn.getAttribute('data-id');
         const action = btn.getAttribute('data-action');
 
+        if (action === 'rename') {
+            const item = btn.closest('.list-item');
+            const player = window.listManager.activePlayersQueue.find(entry => entry.id === id);
+            if (player) startRosterRename(item, id, player.name, window.listManager.renamePlayer.bind(window.listManager), renderSettingsPlayers);
+            return;
+        }
         if (action === 'up') {
             window.listManager.movePlayer(id, -1);
         } else if (action === 'down') {
@@ -471,7 +569,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     inputTargetName.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') btnAddTarget.click();
+        if (e.key === 'Enter' && !e.isComposing && e.keyCode !== 229) btnAddTarget.click();
     });
 
     btnBulkAddTargets.addEventListener('click', () => {
@@ -506,6 +604,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const id = btn.getAttribute('data-id');
         const action = btn.getAttribute('data-action');
 
+        if (action === 'rename') {
+            const item = btn.closest('.list-item');
+            const target = window.listManager.targetBricksPool.find(entry => entry.id === id);
+            if (target) startRosterRename(item, id, target.name, window.listManager.renameTarget.bind(window.listManager), renderSettingsTargets);
+            return;
+        }
         if (action === 'delete') {
             window.listManager.removeTarget(id);
             renderSettingsTargets();
@@ -601,6 +705,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // History Sidebar
     btnHistory.addEventListener('click', () => {
+        settingsModal.classList.remove('active');
         historyDrawer.classList.toggle('active');
         renderHistoryList();
     });
@@ -649,17 +754,31 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Settings Modal
-    btnReadySettings.addEventListener('click', () => btnSettings.click());
-
-    btnSettings.addEventListener('click', () => {
+    function openSettings() {
+        historyDrawer.classList.remove('active');
         renderSettingsPlayers();
         renderSettingsTargets();
         settingsModal.classList.add('active');
-    });
+    }
 
-    btnCloseSettings.addEventListener('click', () => {
+    function closeSettings() {
         settingsModal.classList.remove('active');
         updateHUDOverview();
+        showToast('Roster changes saved');
+    }
+
+    btnReadySettings.addEventListener('click', openSettings);
+    btnSettings.addEventListener('click', openSettings);
+    btnManageRoster.addEventListener('click', openSettings);
+    btnCloseSettings.addEventListener('click', closeSettings);
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape') return;
+        if (settingsModal.classList.contains('active')) {
+            closeSettings();
+        } else if (historyDrawer.classList.contains('active')) {
+            historyDrawer.classList.remove('active');
+        }
     });
 
     // Close modals on overlay backdrop click
