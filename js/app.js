@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const readyRoundNum = document.getElementById('readyRoundNum');
     const readyUpNext = document.getElementById('readyUpNext');
     const btnStartRound = document.getElementById('btnStartRound');
+    const btnReadySettings = document.getElementById('btnReadySettings');
 
     const crashOverlay = document.getElementById('crashOverlay');
     const crashAnnouncement = document.getElementById('crashAnnouncement');
@@ -648,6 +649,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Settings Modal
+    btnReadySettings.addEventListener('click', () => btnSettings.click());
+
     btnSettings.addEventListener('click', () => {
         renderSettingsPlayers();
         renderSettingsTargets();

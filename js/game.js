@@ -102,14 +102,14 @@ class GameEngine {
 
         // Neon color palette for bricks
         this.neonColors = [
-            '#00f3ff', // Neon Cyan
-            '#ff007f', // Hot Pink
-            '#ffd600', // Electric Gold
-            '#00ff88', // Toxic Mint
-            '#b800ff', // Violet Neon
-            '#ff5500', // Bright Orange
-            '#00d4ff', // Sky Blue
-            '#ff2a6d'  // Cyber Magenta
+'#ffcb6b',
+        '#ff786f',
+        '#82d6b7',
+        '#f3a642',
+        '#c3a0e5',
+        '#8ab3e7',
+        '#e795a4',
+        '#a8c98d'
         ];
 
         this.initCanvasDPI();
@@ -602,14 +602,14 @@ class GameEngine {
     renderBackground(ctx) {
         // Deep gradient fill
         const bgGrad = ctx.createLinearGradient(0, 0, 0, this.virtualHeight);
-        bgGrad.addColorStop(0, '#090a10');
-        bgGrad.addColorStop(1, '#0e111a');
+        bgGrad.addColorStop(0, '#151d2c');
+        bgGrad.addColorStop(1, '#101522');
         ctx.fillStyle = bgGrad;
         ctx.fillRect(0, 0, this.virtualWidth, this.virtualHeight);
 
         // Subtle glowing cyber grid lines
         ctx.save();
-        ctx.strokeStyle = 'rgba(0, 243, 255, 0.04)';
+        ctx.strokeStyle = 'rgba(192, 205, 225, 0.055)';
         ctx.lineWidth = 1;
 
         const gridSize = 48;
@@ -632,9 +632,9 @@ class GameEngine {
         // Bottom danger zone glow line
         const dangerY = this.virtualHeight - 55;
         const dangerGrad = ctx.createLinearGradient(0, 0, this.virtualWidth, 0);
-        dangerGrad.addColorStop(0, 'rgba(255, 0, 127, 0.05)');
-        dangerGrad.addColorStop(0.5, 'rgba(255, 0, 127, 0.25)');
-        dangerGrad.addColorStop(1, 'rgba(255, 0, 127, 0.05)');
+        dangerGrad.addColorStop(0, 'rgba(255, 120, 111, 0.025)');
+        dangerGrad.addColorStop(0.5, 'rgba(255, 120, 111, 0.16)');
+        dangerGrad.addColorStop(1, 'rgba(255, 120, 111, 0.025)');
 
         ctx.strokeStyle = dangerGrad;
         ctx.lineWidth = 2;
@@ -665,7 +665,7 @@ class GameEngine {
             // 1. Dark high-contrast background plate
             ctx.beginPath();
             ctx.roundRect(x, y, w, h, radius);
-            ctx.fillStyle = '#0a0d16'; // Deep charcoal/black
+            ctx.fillStyle = '#171f2d';
             ctx.fill();
 
             // Inner subtle gradient fill
@@ -679,7 +679,7 @@ class GameEngine {
             ctx.strokeStyle = color;
             ctx.lineWidth = 2.0;
             ctx.shadowColor = color;
-            ctx.shadowBlur = 8;
+            ctx.shadowBlur = 3;
             ctx.stroke();
 
             // 3. Neon side accent tag
@@ -733,31 +733,30 @@ class GameEngine {
         // 1. Glowing outer shield hull
         ctx.beginPath();
         ctx.roundRect(x, y, w, h, 8);
-        ctx.fillStyle = '#0f172a';
+        ctx.fillStyle = '#222d40';
         ctx.fill();
 
-        // High-tech neon cyan border
-        ctx.strokeStyle = '#00f3ff';
-        ctx.lineWidth = 2.5;
-        ctx.shadowColor = '#00f3ff';
-        ctx.shadowBlur = 12;
+        ctx.strokeStyle = '#ffcb6b';
+        ctx.lineWidth = 2;
+        ctx.shadowColor = '#ffcb6b';
+        ctx.shadowBlur = 5;
         ctx.stroke();
 
         // 2. Wingtip accent stabilizers
-        ctx.fillStyle = '#ff007f';
-        ctx.shadowColor = '#ff007f';
-        ctx.shadowBlur = 8;
+        ctx.fillStyle = '#ff786f';
+        ctx.shadowColor = '#ff786f';
+        ctx.shadowBlur = 4;
         ctx.fillRect(x + 2, y + 4, 6, h - 8);
         ctx.fillRect(x + w - 8, y + 4, 6, h - 8);
 
         // 3. Central glowing energy core
         const coreGrad = ctx.createLinearGradient(centerX - 18, y, centerX + 18, y);
-        coreGrad.addColorStop(0, '#00f3ff');
-        coreGrad.addColorStop(0.5, '#ffffff');
-        coreGrad.addColorStop(1, '#00f3ff');
+        coreGrad.addColorStop(0, '#ffcb6b');
+        coreGrad.addColorStop(0.5, '#fff4dd');
+        coreGrad.addColorStop(1, '#ffcb6b');
         ctx.fillStyle = coreGrad;
-        ctx.shadowColor = '#00f3ff';
-        ctx.shadowBlur = 10;
+        ctx.shadowColor = '#ffcb6b';
+        ctx.shadowBlur = 5;
         ctx.beginPath();
         ctx.roundRect(centerX - 16, y + 5, 32, h - 10, 4);
         ctx.fill();
@@ -776,9 +775,9 @@ class GameEngine {
         ctx.font = `900 36px 'Outfit', 'Inter', system-ui, sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillStyle = '#00f3ff';
-        ctx.shadowColor = '#00f3ff';
-        ctx.shadowBlur = 16;
+        ctx.fillStyle = '#ffcb6b';
+        ctx.shadowColor = '#ffcb6b';
+        ctx.shadowBlur = 6;
         ctx.fillText('GAME PAUSED', this.virtualWidth / 2, this.virtualHeight / 2 - 15);
 
         ctx.font = `500 15px 'Inter', system-ui, sans-serif`;
