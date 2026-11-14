@@ -35,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnNextPlayerReady = document.getElementById('btnNextPlayerReady');
 
     const gameOverModal = document.getElementById('gameOverModal');
+    const gameOverTitle = document.getElementById('gameOverTitle');
     const gameOverReason = document.getElementById('gameOverReason');
     const gameOverTableBody = document.getElementById('gameOverTableBody');
     const btnRematchSame = document.getElementById('btnRematchSame');
@@ -168,6 +169,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 4. Round & Turn Transitions
     function prepareNextTurn() {
+        const declaredWinner = window.listManager.resolveLastPlayerVictory();
+        if (declaredWinner) {
+            updateHUDOverview();
+            renderHistoryList();
+            renderSettingsTargets();
+        }
+
         // Check if game has ended
         if (window.listManager.isGameOver()) {
             showGameOverModal();
@@ -240,7 +248,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // 5. Game Over / Tournament Recap
     function showGameOverModal() {
         let reason = '';
-        if (window.listManager.activePlayersQueue.length === 0 && window.listManager.targetBricksPool.length === 0) {
+        gameOverTitle.textContent = window.listManager.tournamentWinner
+            ? `${window.listManager.tournamentWinner} Wins!`
+            : 'Elimination Complete!';
+        if (window.listManager.tournamentWinner) {
+            const wonTargets = window.listManager.wonTargets;
+            reason = `${window.listManager.tournamentWinner} is the last player standing and wins ${wonTargets.length} remaining target${wonTargets.length === 1 ? '' : 's'}: ${wonTargets.join(', ')}.`;
+        } else if (window.listManager.activePlayersQueue.length === 0 && window.listManager.targetBricksPool.length === 0) {
             reason = 'Both the Active Players Queue and Target Pool have been completely resolved!';
         } else if (window.listManager.activePlayersQueue.length === 0) {
             reason = 'All players in the Active Players Queue have completed their turns!';
@@ -264,13 +278,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             matches.forEach(m => {
                 const tr = document.createElement('tr');
-                const isChampion = m.survivalTime === bestTime && bestTime > 0;
+                const isChampion = m.outcome === 'last-player-win' || (!window.listManager.tournamentWinner && m.survivalTime === bestTime && bestTime > 0);
                 tr.innerHTML = `
                     <td><strong>#${m.round}</strong></td>
-                    <td class="player-cell">${escapeHtml(m.player)} ${isChampion ? '<span class="trophy-badge" title="Longest Survivor">👑</span>' : ''}</td>
+                    <td class="player-cell">${escapeHtml(m.player)} ${isChampion ? '<span class="trophy-badge" title="Tournament winner">👑</span>' : ''}</td>
                     <td class="target-cell">${escapeHtml(m.target)}</td>
-                    <td>${m.survivalTime}s</td>
-                    <td>${m.dodgedCount}</td>
+                    <td>${m.outcome === 'last-player-win' ? 'Winner' : `${m.survivalTime}s`}</td>
+                    <td>${m.outcome === 'last-player-win' ? '—' : m.dodgedCount}</td>
                 `;
                 gameOverTableBody.appendChild(tr);
             });
@@ -376,8 +390,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span class="target-pill">${escapeHtml(m.target)}</span>
                 </div>
                 <div class="history-card-stats">
-                    <span>⏱️ ${m.survivalTime}s</span>
-                    <span>🧱 Dodged: ${m.dodgedCount}</span>
+                    ${m.outcome === 'last-player-win'
+                        ? '<span>Last-player victory</span>'
+                        : `<span>⏱️ ${m.survivalTime}s</span><span>🧱 Dodged: ${m.dodgedCount}</span>`}
                 </div>
             `;
             historyList.appendChild(card);

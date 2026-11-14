@@ -33,6 +33,8 @@ class ListManager {
         this.matchesHistory = [];
         this.currentRoundNumber = 1;
         this.initialRosterSnapshot = null;
+        this.tournamentWinner = null;
+        this.wonTargets = [];
 
         this.STORAGE_KEY = 'arcade_dodge_lists_v1';
         this.loadFromStorage();
@@ -55,8 +57,10 @@ class ListManager {
                 this.matchesHistory = parsed.matchesHistory || [];
                 this.currentRoundNumber = parsed.currentRoundNumber || 1;
                 this.initialRosterSnapshot = parsed.initialRosterSnapshot || null;
+                this.tournamentWinner = parsed.tournamentWinner || null;
+                this.wonTargets = parsed.wonTargets || [];
 
-                if (this.activePlayersQueue.length > 0 && this.targetBricksPool.length > 0) {
+                if (this.tournamentWinner || (this.activePlayersQueue.length > 0 && this.targetBricksPool.length > 0)) {
                     return;
                 }
             }
@@ -75,7 +79,9 @@ class ListManager {
                 targetBricksPool: this.targetBricksPool,
                 matchesHistory: this.matchesHistory,
                 currentRoundNumber: this.currentRoundNumber,
-                initialRosterSnapshot: this.initialRosterSnapshot
+                initialRosterSnapshot: this.initialRosterSnapshot,
+                tournamentWinner: this.tournamentWinner,
+                wonTargets: this.wonTargets
             };
             localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
         } catch (e) {
@@ -87,6 +93,8 @@ class ListManager {
         const preset = PRESETS[presetKey] || PRESETS.party;
         this.activePlayersQueue = preset.players.map(name => ({ id: this.createId(), name: name.trim() }));
         this.targetBricksPool = preset.targets.map(name => ({ id: this.createId(), name: name.trim() }));
+        this.tournamentWinner = null;
+        this.wonTargets = [];
         this.snapshotInitialRoster();
         this.saveToStorage();
     }
@@ -254,6 +262,7 @@ class ListManager {
 
         this.matchesHistory.unshift(matchRecord); // newest first
         this.currentRoundNumber++;
+        this.resolveLastPlayerVictory();
         this.saveToStorage();
 
         return matchRecord;
@@ -280,7 +289,30 @@ class ListManager {
             this.shufflePlayers();
             this.shuffleTargets();
         }
+        this.tournamentWinner = null;
+        this.wonTargets = [];
         this.clearHistory();
+    }
+
+    resolveLastPlayerVictory() {
+        if (this.activePlayersQueue.length !== 1 || this.targetBricksPool.length === 0) return false;
+
+        this.tournamentWinner = this.activePlayersQueue[0].name;
+        this.wonTargets = this.targetBricksPool.map(target => target.name);
+        const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const victoryRecords = this.wonTargets.map(target => ({
+            round: this.currentRoundNumber,
+            player: this.tournamentWinner,
+            target,
+            survivalTime: null,
+            dodgedCount: null,
+            timestamp,
+            outcome: 'last-player-win'
+        }));
+        this.matchesHistory.unshift(...victoryRecords);
+        this.targetBricksPool = [];
+        this.saveToStorage();
+        return true;
     }
 
     /**
@@ -301,17 +333,26 @@ class ListManager {
         // Chronological order (reverse of newest-first)
         const chronological = [...this.matchesHistory].reverse();
         chronological.forEach(m => {
-            text += `Round ${m.round}: ${m.player} 💥 ${m.target} (Survived ${m.survivalTime}s, Dodged ${m.dodgedCount} bricks)\n`;
+            if (m.outcome === 'last-player-win') {
+                text += `Round ${m.round}: ${m.player} crashed into ${m.target} (last-player victory)\n`;
+            } else {
+                text += `Round ${m.round}: ${m.player} crashed into ${m.target} (Survived ${m.survivalTime}s, Dodged ${m.dodgedCount} bricks)\n`;
+            }
         });
         text += `\nTotal Rounds: ${chronological.length}\n`;
+        if (this.tournamentWinner) {
+            text += `Winner: ${this.tournamentWinner}\n`;
+            text += `Remaining targets won: ${this.wonTargets.join(', ')}\n`;
+        }
         return text;
     }
 
     exportCsv() {
-        let csv = "Round,Player,Target Eliminated,Survival Time (s),Bricks Dodged,Time\n";
+        let csv = "Round,Player,Target Eliminated,Result / Survival Time,Bricks Dodged,Time\n";
         const chronological = [...this.matchesHistory].reverse();
         chronological.forEach(m => {
-            csv += `"${m.round}","${m.player.replace(/"/g, '""')}","${m.target.replace(/"/g, '""')}",${m.survivalTime},${m.dodgedCount},"${m.timestamp}"\n`;
+            const status = m.outcome === 'last-player-win' ? 'Won as last player' : `${m.survivalTime}s`;
+            csv += `"${m.round}","${m.player.replace(/"/g, '""')}","${m.target.replace(/"/g, '""')}","${status}",${m.dodgedCount ?? ''},"${m.timestamp}"\n`;
         });
         return csv;
     }
