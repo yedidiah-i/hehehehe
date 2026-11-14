@@ -142,6 +142,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
     opacity: 0; pointer-events: none; transition: opacity 220ms ease;
 }
 .modal-backdrop.active { opacity: 1; pointer-events: auto; }
+#settingsModal { position: fixed; z-index: 100; }
 .overlay-card {
     position: relative; width: min(100%, 478px); padding: clamp(24px, 4vw, 36px);
     border: 1px solid rgba(210,220,236,.17); border-radius: 22px;
