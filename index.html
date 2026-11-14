@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcade Dodge: Name Crash Elimination</title>
+    
+    <!-- Google Fonts for Cyberpunk / Neon Arcade Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800;900&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- TOP HUD & CONTROL BAR -->
+    <header class="app-header">
+        <div class="brand-section">
+            <span class="logo-badge">ARCADE</span>
+            <h1 class="brand-title">NAME CRASH DODGE</h1>
+        </div>
+
+        <div class="hud-roster-group">
+            <div class="hud-pill round" id="hudRoundNum">Round 1</div>
+            <div class="hud-pill active-player">
+                <span class="pill-label">Player</span>
+                <span class="pill-value" id="hudCurrentPlayer">Loading...</span>
+            </div>
+            <div class="hud-pill up-next">
+                <span class="pill-label">Up Next</span>
+                <span class="pill-value" id="hudUpNext">Loading...</span>
+            </div>
+            <div class="hud-pill targets">
+                <span class="pill-label">Targets</span>
+                <span class="pill-value" id="hudTargetsLeft">0 left</span>
+            </div>
+        </div>
+
+        <div class="hud-stats-group">
+            <div class="hud-stat-box time">
+                <span class="stat-label">SURVIVED</span>
+                <span class="stat-val" id="hudSurvivalTime">0.0s</span>
+            </div>
+            <div class="hud-stat-box dodged">
+                <span class="stat-label">DODGED</span>
+                <span class="stat-val" id="hudDodgedCount">0</span>
+            </div>
+            <div class="hud-stat-box speed">
+                <span class="stat-label">SPEED</span>
+                <span class="stat-val" id="hudSpeedBadge">Spd 5</span>
+            </div>
+        </div>
+
+        <div class="hud-actions-group">
+            <button class="action-btn" id="btnPause" title="Pause Game (Esc)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                Pause
+            </button>
+            <button class="action-btn" id="btnSound" title="Toggle Sound">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+            </button>
+            <button class="action-btn" id="btnHistory" title="Match History / Log">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+                Log <span class="btn-badge" id="historyBadgeCount">0</span>
+            </button>
+            <button class="action-btn" id="btnSettings" title="Settings & Rosters">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+                Settings
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN GAME CANVAS VIEWPORT -->
+    <main class="game-viewport">
+        <div class="canvas-container">
+            <canvas id="gameCanvas"></canvas>
+
+            <!-- 1. READY OVERLAY (Before Active Turn Starts) -->
+            <div class="modal-backdrop" id="readyOverlay">
+                <div class="overlay-card">
+                    <div class="overlay-header">
+                        <div class="overlay-subtitle" id="readyRoundNum">ROUND 1</div>
+                        <h2 class="overlay-title">Ready, <span class="highlight-player" id="readyPlayerName">Player</span>!</h2>
+                    </div>
+                    <div class="overlay-body">
+                        <p class="overlay-desc">Dodge falling target bricks as long as you can. When you crash into a brick, its name is permanently paired with you and removed from the target pool!</p>
+                        <div class="next-player-info" id="readyUpNext">Up Next: Next Player</div>
+                        <div class="controls-hint-pill">
+                            <span>🎮 Controls: <strong>A / D</strong> or <strong>← / →</strong> or <strong>Touch / Mouse Drag</strong></span>
+                        </div>
+                    </div>
+                    <div class="overlay-footer">
+                        <button class="btn-primary-cta" id="btnStartRound">START ROUND (SPACE)</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. CRASH & TURN TRANSITION OVERLAY -->
+            <div class="modal-backdrop" id="crashOverlay">
+                <div class="overlay-card">
+                    <div class="overlay-header">
+                        <div class="overlay-subtitle" style="color: var(--neon-pink);">💥 IMPACT RECORDED</div>
+                        <h2 class="overlay-title" id="crashAnnouncement">
+                            <span class="highlight-player" id="crashPlayerName">Player</span> crashed into <span class="highlight-brick" id="crashBrickName">Target</span>!
+                        </h2>
+                    </div>
+                    <div class="overlay-body">
+                        <p class="overlay-desc">Match recorded! This target brick has been eliminated from the pool.</p>
+                        <div class="overlay-stats-grid">
+                            <div class="overlay-stat-item">
+                                <span class="overlay-stat-label">Survival Time</span>
+                                <span class="overlay-stat-val" id="crashSurvivalTime">0.0s</span>
+                            </div>
+                            <div class="overlay-stat-item">
+                                <span class="overlay-stat-label">Bricks Dodged</span>
+                                <span class="overlay-stat-val" id="crashDodgedCount">0</span>
+                            </div>
+                        </div>
+                        <div class="next-player-info" id="crashNextPlayerHint">Next in queue: ...</div>
+                    </div>
+                    <div class="overlay-footer">
+                        <button class="btn-primary-cta crash-cta" id="btnNextPlayerReady">NEXT PLAYER READY (SPACE)</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. GAME OVER / RECAP OVERLAY -->
+            <div class="modal-backdrop" id="gameOverModal">
+                <div class="overlay-card gameover-modal-card">
+                    <div class="overlay-header">
+                        <div class="overlay-subtitle" style="color: var(--neon-green);">TOURNAMENT RESOLVED</div>
+                        <h2 class="overlay-title">Elimination Complete!</h2>
+                    </div>
+                    <div class="overlay-body">
+                        <p class="overlay-desc" id="gameOverReason">All active players have completed their turns or all targets have been eliminated.</p>
+                        
+                        <div class="gameover-table-container">
+                            <table class="recap-table">
+                                <thead>
+                                    <tr>
+                                        <th>Round</th>
+                                        <th>Player</th>
+                                        <th>Eliminated Target</th>
+                                        <th>Survived</th>
+                                        <th>Dodged</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="gameOverTableBody">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="overlay-footer">
+                        <div class="modal-actions-row">
+                            <button class="btn-primary-cta" id="btnRematchSame">Rematch (Same Lists)</button>
+                            <button class="btn-primary-cta" style="background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink)); color: #fff;" id="btnRematchShuffle">Shuffle & Rematch</button>
+                            <button class="action-btn" id="btnGameOverCopy" title="Copy results">📋 Copy</button>
+                            <button class="action-btn" id="btnCloseGameOver">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- 4. SETTINGS MODAL (COMPREHENSIVE LIVE CONTROLS) -->
+    <div class="modal-backdrop" id="settingsModal">
+        <div class="overlay-card settings-modal-card">
+            <div class="modal-header-bar">
+                <div class="modal-title-row">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="var(--neon-cyan)"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+                    <h2>Arcade Settings & Dual Lists Manager</h2>
+                </div>
+                <button class="btn-close-modal" id="btnCloseSettings" title="Close Settings">✕</button>
+            </div>
+
+            <div class="settings-modal-body">
+                <!-- Left Column: Live Physics & Gameplay Settings -->
+                <div class="settings-controls-pane">
+                    <!-- Extreme Speed Slider -->
+                    <div class="settings-group">
+                        <div class="settings-group-title">
+                            <span>Fall Speed</span>
+                            <span class="slider-val-badge" id="speedValueDisplay">5 (Rapid - 530 px/s)</span>
+                        </div>
+                        <input type="range" min="1" max="10" value="5" class="arcade-slider" id="speedSlider">
+                        <p class="setting-desc">Levels 1 (Normal) to 10 (Insane reflex test). At 7+, bricks plunge at extreme reflex speeds.</p>
+
+                        <label class="toggle-row">
+                            <span>Gradual Speed Ramp</span>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="speedRampToggle" checked>
+                                <span class="toggle-slider"></span>
+                            </div>
+                        </label>
+                        <p class="setting-desc">Speed continuously accelerates the longer an active player survives their turn.</p>
+                    </div>
+
+                    <!-- On-Screen Brick Density Control -->
+                    <div class="settings-group">
+                        <div class="settings-group-title">
+                            <span>Brick Density</span>
+                            <span class="slider-val-badge" id="densityValueDisplay">9 Bricks</span>
+                        </div>
+                        <input type="range" min="3" max="18" value="9" class="arcade-slider" id="densitySlider">
+                        <p class="setting-desc">Simultaneous falling bricks on screen (3 to 18). If remaining targets are fewer, names repeat so the screen stays packed!</p>
+                    </div>
+
+                    <!-- Controls & Presets -->
+                    <div class="settings-group">
+                        <div class="settings-group-title">Presets & Theme</div>
+                        <label class="setting-desc">Quick Roster Presets:</label>
+                        <select class="form-select" id="presetSelect">
+                            <option value="party">🎉 Party Crew (Friends & Celebrities)</option>
+                            <option value="tech">💻 Tech Titans & Founders</option>
+                            <option value="villains">🦹 Legendary Movie Villains</option>
+                            <option value="office">🏢 Office Chaos & Corporate Legends</option>
+                        </select>
+                        <button class="btn-secondary-sm" id="btnResetDefaults" style="margin-top: 6px;">Reset Lists to Preset Defaults</button>
+                    </div>
+
+                    <!-- Audio Controls -->
+                    <div class="settings-group">
+                        <div class="settings-group-title">Audio & Sound FX</div>
+                        <label class="toggle-row">
+                            <span>Synthesized Audio</span>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="soundToggleSetting" checked>
+                                <span class="toggle-slider"></span>
+                            </div>
+                        </label>
+                        <label class="slider-header" style="margin-top: 6px;">
+                            <span class="setting-desc">Volume:</span>
+                            <input type="range" min="0" max="1" step="0.05" value="0.4" class="arcade-slider" id="volumeSlider" style="width: 120px;">
+                        </label>
+                    </div>
+
+                    <!-- Input Mode -->
+                    <div class="settings-group">
+                        <div class="settings-group-title">Controls Mode</div>
+                        <select class="form-select" id="controlModeSelect">
+                            <option value="both">Both Keyboard & Mouse / Touch (Recommended)</option>
+                            <option value="keyboard">Keyboard Only (A/D & Arrows)</option>
+                            <option value="mouse">Mouse / Touch Drag Only</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Right Column: Dual Lists Management (Active Players Queue + Target Pool) -->
+                <div class="settings-lists-pane">
+                    
+                    <!-- LIST 1: Active Players Queue -->
+                    <div class="list-panel players-panel">
+                        <div class="list-panel-header">
+                            <div class="list-title">
+                                <span>👥 Active Players Queue</span>
+                            </div>
+                            <span class="list-count-badge" id="playersCountBadge">0 in queue</span>
+                        </div>
+                        <p class="setting-desc">Sequential order of people who take turns at the controls.</p>
+
+                        <div class="list-input-row">
+                            <input type="text" class="list-input" id="inputPlayerName" placeholder="Enter player name..." maxlength="24">
+                            <button class="btn-add-item" id="btnAddPlayer">+ Add</button>
+                        </div>
+
+                        <!-- Bulk Add Accordion -->
+                        <details class="bulk-drawer">
+                            <summary class="setting-desc" style="cursor: pointer; color: var(--neon-cyan);">+ Bulk Paste Players (Comma or Newline)</summary>
+                            <textarea class="bulk-textarea" id="textareaBulkPlayers" placeholder="Alice, Bob, Charlie, Dana..."></textarea>
+                            <button class="btn-secondary-sm" id="btnBulkAddPlayers">Add All to Queue</button>
+                        </details>
+
+                        <div class="list-items-container" id="playersListContainer">
+                            <!-- Populated dynamically -->
+                        </div>
+
+                        <div class="list-footer-actions">
+                            <button class="btn-secondary-sm" id="btnShufflePlayers" title="Shuffle queue order">🔀 Shuffle</button>
+                            <button class="btn-secondary-sm" id="btnClearPlayers" title="Clear all players">🗑️ Clear All</button>
+                        </div>
+                    </div>
+
+                    <!-- LIST 2: Target Bricks Pool -->
+                    <div class="list-panel targets-panel">
+                        <div class="list-panel-header">
+                            <div class="list-title">
+                                <span>🎯 Target Bricks Pool</span>
+                            </div>
+                            <span class="list-count-badge" id="targetsCountBadge">0 targets</span>
+                        </div>
+                        <p class="setting-desc">Names assigned to falling bricks. Removed permanently when hit.</p>
+
+                        <div class="list-input-row">
+                            <input type="text" class="list-input" id="inputTargetName" placeholder="Enter target name..." maxlength="24">
+                            <button class="btn-add-item pink" id="btnAddTarget">+ Add</button>
+                        </div>
+
+                        <!-- Bulk Add Accordion -->
+                        <details class="bulk-drawer">
+                            <summary class="setting-desc" style="cursor: pointer; color: var(--neon-pink);">+ Bulk Paste Targets (Comma or Newline)</summary>
+                            <textarea class="bulk-textarea" id="textareaBulkTargets" placeholder="Target 1, Target 2, Target 3..."></textarea>
+                            <button class="btn-secondary-sm" id="btnBulkAddTargets">Add All to Targets</button>
+                        </details>
+
+                        <div class="list-items-container" id="targetsListContainer">
+                            <!-- Populated dynamically -->
+                        </div>
+
+                        <div class="list-footer-actions">
+                            <button class="btn-secondary-sm" id="btnShuffleTargets" title="Shuffle target pool">🔀 Shuffle</button>
+                            <button class="btn-secondary-sm" id="btnClearTargets" title="Clear all targets">🗑️ Clear All</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. MATCH LOG / HISTORY SIDEBAR DRAWER -->
+    <aside class="history-drawer" id="historyDrawer">
+        <div class="drawer-header">
+            <h3 class="drawer-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--neon-amber)"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+                Match Log & Pairings
+            </h3>
+            <button class="btn-close-modal" id="btnCloseHistory" title="Close Log">✕</button>
+        </div>
+
+        <div class="history-list-content" id="historyList">
+            <!-- Populated dynamically -->
+        </div>
+
+        <div class="drawer-footer">
+            <button class="btn-secondary-sm" id="btnExportHistory" style="flex: 2;">📋 Copy Results</button>
+            <button class="btn-secondary-sm" id="btnClearHistory" style="flex: 1;">🗑️ Clear</button>
+        </div>
+    </aside>
+
+    <!-- TOAST NOTIFICATION -->
+    <div class="toast" id="toast">Settings updated</div>
+
+    <!-- SCRIPTS -->
+    <script src="js/audio.js"></script>
+    <script src="js/particles.js"></script>
+    <script src="js/lists.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
